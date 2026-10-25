@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+{% block title %}Opportunities{% endblock %}
+{% block content %}
+            <section class="space-y-1">
+                <h2 class="text-2xl font-bold text-slate-900">Opportunities</h2>
+                <p class="text-sm text-slate-500">Programs and competitions for high schoolers, with AI picks matched to you.</p>
+            </section>
+
+            <section class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+                <!-- One combined panel: AI Picks, search and listings -->
+                <div class="lg:col-span-2 bg-white p-6 rounded-lg border border-slate-200 shadow-sm space-y-6">
+                    <form method="post" action="{{ url_for('opportunities') }}" class="space-y-4" data-ai-form>
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                    <h3 class="text-base font-semibold text-slate-900">&#10024; AI Picks</h3>
+                    <p class="text-xs text-slate-500 -mt-2">Personalized ideas from your activity log and what you're looking for.</p>
+                    <div>
+                        <span class="block text-xs font-medium text-slate-700 mb-2">Where are you open to doing extracurriculars?</span>
+                        {% for value, label in [('local', 'Near me'), ('anywhere', 'Anywhere in the U.S. (incl. online)'), ('both', 'Near me and nationwide')] %}
+                        <label class="flex items-center gap-2 text-sm text-slate-700 py-1">
+                            <input type="radio" name="location-mode" value="{{ value }}" {{ 'checked' if ai.location_mode == value }}> {{ label }}
+                        </label>
+                        {% endfor %}
+                    </div>
+                    <div>
+                        <label for="location" class="block text-xs font-medium text-slate-700 mb-1">City or ZIP code</label>
+                        <input type="text" id="location" name="location" maxlength="100" value="{{ ai.location }}" placeholder="e.g. Austin, TX or 78701" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md focus:outline-none">
+                        <p class="text-xs text-slate-400 mt-1">Not needed for "Anywhere in the U.S."</p>
+                    </div>
+                    <div>
+                        <label for="interests" class="block text-xs font-medium text-slate-700 mb-1">What ECs are you looking for?</label>
+                        <textarea id="interests" name="interests" rows="4" maxlength="500" placeholder="e.g. biology research, leadership roles, low time commitment..." class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md focus:outline-none resize-none">{{ ai.interests }}</textarea>
+                    </div>
+                    <button type="submit" class="btn-primary btn-lg w-full">Get Recommendations</button>
+                    <p data-ai-status class="hidden text-xs text-indigo-700" role="status">Finding picks for you&hellip; this can take up to a minute. Please keep this page open.</p>
+                    <p class="text-xs text-slate-500">
+                        Uses your {{ activity_count }} saved {{ 'activity' if activity_count == 1 else 'activities' }}.
+                        {% if activity_count == 0 %}<a href="{{ url_for('activities') }}" class="text-indigo-600">Add some</a> for better matches.{% endif %}
+                        Your activities and what you type are sent to {{ 'Google\'s Gemini' if ai_provider == 'gemini' else 'Anthropic\'s Claude' }} to generate ideas.{% if ai_provider == 'gemini' %} Google may use free-tier requests to improve its products, so don't include anything private.{% endif %}
+                    </p>
+                </form>
+
+                    {% if ai.recs is not none %}
+                    <div class="space-y-3">
+                        <h3 class="text-sm font-semibold uppercase tracking-wider text-indigo-700">&#10024; Picked for you</h3>
+                        {% if ai.summary %}<p class="text-sm text-slate-600 bg-slate-50 p-4 rounded-lg border border-slate-200">{{ ai.summary }}</p>{% endif %}
+                        {% for r in ai.recs %}
+                        <article class="bg-indigo-50/40 p-5 rounded-lg border border-indigo-100 space-y-2">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <h3 class="text-base font-semibold text-slate-900">{{ r.name }}</h3>
+                                <span class="text-xs font-semibold px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-100">{{ r.kind }}</span>
+                                <span class="text-xs px-2 py-0.5 rounded bg-slate-100 text-slate-600">{{ r.specificity }}</span>
+                            </div>
+                            <p class="text-xs font-medium text-slate-600">{{ r.organization }} · {{ r.location_fit }}</p>
+                            <p class="text-sm text-slate-700">{{ r.why_it_fits }}</p>
+                            <p class="text-xs text-slate-500"><span class="font-semibold">How to find it:</span> {{ r.how_to_find }}</p>
+                            <p class="text-xs text-slate-500"><span class="font-semibold">Time:</span> {{ r.time_commitment }}</p>
+                        </article>
+                        {% endfor %}
+                        <p class="text-xs text-slate-400">AI suggestions can be wrong or out of date. Always verify a program exists and check its dates, cost and eligibility on its official site, or look for it on <a href="https://ecdatabase.org/opportunities" target="_blank" rel="noopener noreferrer" class="underline">EC Database</a>.</p>
+                    </div>
+                    {% endif %}
+
+                    <hr class="border-slate-100">
+
+                    <form method="get" action="{{ url_for('opportunities') }}" class="grid grid-cols-1 md:grid-cols-5 gap-3">
+                <input type="search" name="q" value="{{ f.q }}" placeholder="Search programs, e.g. robotics" aria-label="Search" class="md:col-span-2 px-3 py-2 text-sm border border-slate-300 rounded-md">
+                <select name="category" aria-label="Category" class="px-3 py-2 text-sm border border-slate-300 rounded-md bg-white">
+                    <option value="">All categories</option>
+                    {% for c in categories %}<option value="{{ c }}" {{ 'selected' if f.category == c }}>{{ c }}</option>{% endfor %}
+                </select>
+                <select name="format" aria-label="Format" class="px-3 py-2 text-sm border border-slate-300 rounded-md bg-white">
+                    <option value="">Any format</option>
+                    {% for x in formats %}<option value="{{ x }}" {{ 'selected' if f.format == x }}>{{ x|capitalize }}</option>{% endfor %}
+                </select>
+                <input type="text" name="location" value="{{ f.location }}" placeholder="Your state or city" aria-label="Location" class="px-3 py-2 text-sm border border-slate-300 rounded-md">
+                <div class="md:col-span-5 flex items-center gap-3">
+                    <button type="submit" class="btn-secondary btn-sm">Search</button>
+                    <a href="{{ url_for('opportunities') }}" class="text-xs text-slate-500 hover:text-slate-800">Clear filters</a>
+                    <span class="text-xs text-slate-500 ml-auto">{{ rows|length }} result{{ '' if rows|length == 1 else 's' }} · nationwide and virtual listings always show</span>
+                </div>
+            </form>
+
+                    <div class="space-y-3">
+                        {% for o in rows %}
+                    <article class="bg-white p-5 rounded-lg border border-slate-200 shadow-sm space-y-2">
+                        <div class="flex flex-wrap items-start justify-between gap-2">
+                            <div>
+                                <h3 class="text-base font-semibold text-slate-900">
+                                    {% if o.url %}<a href="{{ o.url }}" target="_blank" rel="noopener noreferrer" class="hover:text-indigo-700">{{ o.title }} &nearr;</a>{% else %}{{ o.title }}{% endif %}
+                                </h3>
+                                <p class="text-xs font-medium text-slate-600">{{ o.organization }}</p>
+                            </div>
+                            {% if o.user_id %}
+                            <form method="post" action="{{ url_for('delete_opportunity', opp_id=o.id) }}" onsubmit="return confirm('Delete this listing?');">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                                <button type="submit" class="text-xs text-red-600 hover:text-red-800 font-medium">Delete</button>
+                            </form>
+                            {% endif %}
+                        </div>
+                        {% if o.description %}<p class="text-sm text-slate-700">{{ o.description }}</p>{% endif %}
+                        <div class="flex flex-wrap items-center gap-2 text-xs">
+                            <span class="font-semibold px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-100">{{ o.category }}</span>
+                            <span class="px-2 py-0.5 rounded bg-slate-100 text-slate-600">{{ o.format|capitalize }}</span>
+                            <span class="px-2 py-0.5 rounded bg-slate-100 text-slate-600">{{ o.location }}</span>
+                            {% if o.deadline %}<span class="px-2 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-100">Apply by {{ o.deadline }}</span>{% endif %}
+                            {% if o.user_id %}<span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-100">Added by you</span>{% endif %}
+                        </div>
+                    </article>
+                    {% else %}
+                    <div class="bg-white p-8 rounded-lg border border-slate-200 shadow-sm text-center text-sm text-slate-500">No listings match. Try fewer filters, or add one on the left.</div>
+                    {% endfor %}
+                        <p class="text-xs text-slate-400">Built-in listings don't show dates, costs or eligibility, which change every year. Check each program's own site before applying.</p>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-1">
+                    <form method="post" action="{{ url_for('add_opportunity') }}" class="bg-white p-6 rounded-lg border border-slate-200 shadow-sm space-y-3">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                    <h3 class="text-base font-semibold text-slate-900">Add a listing</h3>
+                    <p class="text-xs text-slate-500">Found something local? Save it here. Only you can see listings you add.</p>
+                    <input type="text" name="title" required maxlength="150" placeholder="Title" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md">
+                    <input type="text" name="organization" required maxlength="150" placeholder="Organization" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md">
+                    <div class="grid grid-cols-2 gap-3">
+                        <select name="category" required aria-label="Category" class="px-3 py-2 text-sm border border-slate-300 rounded-md bg-white">
+                            {% for c in categories %}<option>{{ c }}</option>{% endfor %}
+                        </select>
+                        <select name="format" required aria-label="Format" class="px-3 py-2 text-sm border border-slate-300 rounded-md bg-white">
+                            {% for x in formats %}<option value="{{ x }}">{{ x|capitalize }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    <input type="text" name="location" required maxlength="100" placeholder="Location, e.g. Austin, TX" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md">
+                    <input type="date" name="deadline" aria-label="Apply-by date (optional)" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md">
+                    <input type="url" name="url" maxlength="300" placeholder="Link (optional)" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md">
+                    <textarea name="description" rows="3" maxlength="400" placeholder="Short description (optional)" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md resize-none"></textarea>
+                    <button type="submit" class="btn-secondary w-full btn-sm">Save listing</button>
+                </form>
+                </div>
+            </section>
+{% endblock %}

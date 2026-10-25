@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% block title %}Activity Log{% endblock %}
+{% block content %}
+            <header class="space-y-1">
+                <h2>Activity Log</h2>
+                <p class="text-sm text-slate-500">Record your extracurriculars, leadership and work experience.</p>
+            </header>
+
+            <!-- Extracurricular Submission Section -->
+            <section id="activities" class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                
+                <!-- Activity Entry Form -->
+                <div class="lg:col-span-1 bg-white p-6 rounded-lg border border-slate-200 shadow-sm space-y-4">
+                    <div class="border-b border-slate-100 pb-3">
+                        <h3 class="text-base font-semibold text-slate-900">Add Extracurricular</h3>
+                        <p class="text-xs text-slate-500 mt-0.5">Record leadership, clubs, employment, or honors.</p>
+                    </div>
+
+                    <form id="activity-form" class="space-y-4" method="post" action="{{ url_for('add_activity') }}">
+<input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                        <div>
+                            <label for="activity-type" class="block text-xs font-medium text-slate-700 mb-1">Activity Type</label>
+                            <select id="activity-type" name="activity-type" required class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white">
+                                <option value="">Select activity category...</option>
+                                <option value="Academic">Academic / Research</option>
+                                <option value="Athletics">Athletics / Sports</option>
+                                <option value="Community Service">Community Service / Volunteer</option>
+                                <option value="Leadership">Student Leadership / Governance</option>
+                                <option value="Work Experience">Work Experience / Internship</option>
+                                <option value="Arts">Arts / Music / Performing</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="activity-title" class="block text-xs font-medium text-slate-700 mb-1">Position / Leadership Title</label>
+                            <input type="text" id="activity-title" name="activity-title" required maxlength="100" placeholder="e.g. Club President, Volunteer Lead" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+
+                        <div>
+                            <label for="organization-name" class="block text-xs font-medium text-slate-700 mb-1">Organization / School Name</label>
+                            <input type="text" id="organization-name" name="organization-name" required maxlength="100" placeholder="e.g. Debate Honor Society" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label for="hours-per-week" class="block text-xs font-medium text-slate-700 mb-1">Hours / Week</label>
+                                <input type="number" id="hours-per-week" name="hours-per-week" required min="1" max="168" placeholder="e.g. 5" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                            </div>
+                            <div>
+                                <label for="weeks-per-year" class="block text-xs font-medium text-slate-700 mb-1">Weeks / Year</label>
+                                <input type="number" id="weeks-per-year" name="weeks-per-year" required min="1" max="52" placeholder="e.g. 36" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="activity-description" class="block text-xs font-medium text-slate-700 mb-1">Description & Key Achievements</label>
+                            <textarea id="activity-description" name="activity-description" rows="3" maxlength="150" placeholder="Summarize responsibilities, impact, and measurable achievements..." class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none"></textarea>
+                            <p class="text-right text-xs text-slate-400 mt-1"><span id="char-count">0</span>/150 characters</p>
+                        </div>
+
+                        <button type="submit" class="btn-primary btn-lg w-full">
+                            Save Activity Record
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Activity Log List -->
+                <div class="lg:col-span-2 bg-white p-6 rounded-lg border border-slate-200 shadow-sm flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+                            <div>
+                                <h3 class="text-base font-semibold text-slate-900">Activity Log</h3>
+                                <p class="text-xs text-slate-500 mt-0.5">Recorded achievements for application export.</p>
+                            </div>
+                            <span class="text-xs bg-slate-100 text-slate-700 px-2.5 py-1 rounded font-mono">{{ activities|length }} / {{ max_activities }}</span>
+                        </div>
+
+                        <!-- Dynamic List Container -->
+                        <div id="activity-log-container" class="space-y-3">
+                            {% for a in activities %}
+                            <div class="p-4 rounded-md border border-slate-200 bg-slate-50/50 flex flex-col sm:flex-row justify-between sm:items-center gap-3">
+                                <div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-xs font-semibold px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-100">{{ a.category }}</span>
+                                        <h4 class="text-sm font-semibold text-slate-800">{{ a.title }}</h4>
+                                    </div>
+                                    <p class="text-xs font-medium text-slate-600 mt-1">{{ a.organization }}</p>
+                                    {% if a.description %}<p class="text-xs text-slate-500 mt-1">{{ a.description }}</p>{% endif %}
+                                </div>
+                                <div class="text-right flex-shrink-0">
+                                    <span class="text-xs font-mono text-slate-500 block">{{ a.hours_per_week }} hrs/wk • {{ a.weeks_per_year }} wks/yr</span>
+                                    <form method="post" action="{{ url_for('delete_activity', activity_id=a.id) }}" onsubmit="return confirm('Delete this activity?');">
+<input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                                        <button type="submit" class="text-xs text-red-600 hover:text-red-800 font-medium mt-2 focus:outline-none">Delete</button>
+                                    </form>
+                                </div>
+                            </div>
+                            {% else %}
+                            <p class="text-sm text-slate-500 text-center py-8">No activities recorded yet. Add one using the form.</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="mt-6 pt-4 border-t border-slate-100 flex justify-end">
+                        <a id="export-activities" href="{{ url_for('activities_summary') }}" target="_blank" class="btn-secondary btn-sm">
+                            Export Summary (PDF)
+                        </a>
+                    </div>
+                </div>
+            </section>
+{% endblock %}

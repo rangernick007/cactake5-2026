@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}Create account{% endblock %}
+{% block content %}
+        <section class="max-w-md mx-auto my-auto w-full bg-white p-6 rounded-lg border border-slate-200 shadow-sm space-y-4">
+            <div class="border-b border-slate-100 pb-3">
+                <h2 class="text-xl font-bold text-slate-900">Create account</h2>
+                <p class="text-xs text-slate-500 mt-0.5">Save your activities, deadlines and resume.</p>
+            </div>
+            <form method="post" action="{{ url_for('register') }}" class="space-y-4">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <div>
+                    <label for="name" class="block text-xs font-medium text-slate-700 mb-1">Full name</label>
+                    <input type="text" id="name" name="name" required maxlength="100" autocomplete="name" autofocus class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                <div>
+                    <label for="email" class="block text-xs font-medium text-slate-700 mb-1">Email</label>
+                    <input type="email" id="email" name="email" required maxlength="200" autocomplete="email" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                <div>
+                    <label for="password" class="block text-xs font-medium text-slate-700 mb-1">Password (8+ characters)</label>
+                    <input type="password" id="password" name="password" required minlength="8" autocomplete="new-password" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                <div>
+                    <label for="confirm" class="block text-xs font-medium text-slate-700 mb-1">Confirm password</label>
+                    <input type="password" id="confirm" name="confirm" required minlength="8" autocomplete="new-password" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                <button type="submit" class="btn-primary btn-lg w-full">Create account</button>
+            </form>
+            <p class="text-xs text-slate-500 text-center">Already have an account? <a href="{{ url_for('login') }}" class="text-indigo-600 font-medium">Log in</a></p>
+        </section>
+{% endblock %}

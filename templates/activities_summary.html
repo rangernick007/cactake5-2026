@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Activity Summary</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="max-w-3xl mx-auto p-8 text-slate-800">
+    <div class="no-print flex gap-3 mb-6">
+        <button data-print class="btn-primary btn-sm">Save as PDF / Print</button>
+        <a href="{{ url_for('activities') }}" class="px-4 py-2 border border-slate-300 text-sm font-medium rounded-md">Back</a>
+    </div>
+    <h1 class="text-2xl font-bold mb-1">Activity Summary</h1>
+    <p class="text-sm text-slate-500 mb-6">{{ activities|length }} activities</p>
+    {% for a in activities %}
+    <div class="mb-5 break-inside-avoid">
+        <h2 class="font-semibold">{{ a.title }} <span class="font-normal text-slate-600">— {{ a.organization }}</span></h2>
+        <p class="text-xs text-slate-500">{{ a.category }} · {{ a.hours_per_week }} hrs/wk · {{ a.weeks_per_year }} wks/yr</p>
+        {% if a.description %}<p class="text-sm mt-1">{{ a.description }}</p>{% endif %}
+    </div>
+    {% else %}
+    <p class="text-slate-500">No activities recorded.</p>
+    {% endfor %}
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

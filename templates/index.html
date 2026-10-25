@@ -1,108 +1,14 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>College Planner & Application Tracker</title>
-    
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Google Fonts: Inter -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- External CSS stylesheet link -->
-    <link rel="stylesheet" href="static/css/style.css">
-    
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-    </style>
-</head>
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col antialiased">
-
-    <!-- Navigation Overlay for mobile sidebar -->
-    <div id="sidebar-overlay" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 hidden transition-opacity duration-300"></div>
-
-    <!-- Top Navigation Bar -->
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 flex items-center justify-between px-4 lg:px-8 py-3">
-        <div class="flex items-center gap-4">
-            <!-- Sidebar Toggle Button -->
-            <button id="sidebar-toggle" class="p-2 rounded-md hover:bg-slate-100 text-slate-600 focus:outline-none focus:ring-2 focus:ring-slate-400 transition-colors" aria-label="Toggle Menu">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                </svg>
-            </button>
-            <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-lg bg-indigo-900 text-white flex items-center justify-center font-bold text-sm tracking-wider">CP</div>
-                <h1 class="text-lg font-semibold text-slate-900 tracking-tight">College Planner</h1>
-            </div>
-        </div>
-        
-        <div class="flex items-center gap-4">
-            <span class="text-xs font-medium px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200 hidden sm:inline-block">Academic Year 2026–2027</span>
-            <div class="h-8 w-8 rounded-full bg-slate-200 flex items-center justify-center text-xs font-semibold text-slate-700 border border-slate-300">
-                JD
-            </div>
-        </div>
-    </header>
-
-    <div class="flex flex-1 relative overflow-hidden">
-        <!-- Drawer Side Navigation Menu -->
-        <aside id="sidebar" class="fixed top-0 left-0 bottom-0 z-50 w-64 bg-slate-900 text-slate-300 transform -translate-x-full transition-transform duration-300 ease-in-out flex flex-col justify-between">
-            <div>
-                <div class="p-5 border-b border-slate-800 flex items-center justify-between">
-                    <span class="text-sm font-semibold tracking-wider text-slate-400 uppercase">Navigation</span>
-                    <button id="sidebar-close" class="text-slate-400 hover:text-white p-1 rounded-md">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                    </button>
-                </div>
-                <nav class="p-4 space-y-1">
-                    <a href="#dashboard" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-md bg-indigo-600 text-white transition-colors">
-                        <svg class="w-4 h-4 mr-3 text-indigo-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
-                        </svg>
-                        Dashboard
-                    </a>
-                    <a href="#activities" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-md text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">
-                        <svg class="w-4 h-4 mr-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                        </svg>
-                        Extracurriculars
-                    </a>
-                    <a href="#calendar" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-md text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">
-                        <svg class="w-4 h-4 mr-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                        </svg>
-                        Deadlines & Calendar
-                    </a>
-                    <a href="#resume" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-md text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">
-                        <svg class="w-4 h-4 mr-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                        </svg>
-                        Resume Builder
-                    </a>
-                </nav>
-            </div>
-            <div class="p-4 border-t border-slate-800">
-                <div class="text-xs text-slate-500">College Application Platform</div>
-                <div class="text-xs text-slate-400 mt-1">Version 2.4.0</div>
-            </div>
-        </aside>
-
-        <!-- Main Content Canvas -->
-        <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 space-y-8">
-            
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
             <!-- Dashboard Overview Section -->
-            <section id="dashboard" class="space-y-6">
-                <div>
-                    <h2 class="text-2xl font-bold text-slate-900 tracking-tight">Application Overview</h2>
-                    <p class="text-sm text-slate-500 mt-1">Track key metrics, milestones, and college submission progress.</p>
+            <section id="dashboard" class="space-y-8">
+                <div class="flex flex-wrap items-end justify-between gap-6">
+                    <div class="space-y-1">
+                        <h2>Welcome back, {{ current_user.name.split()[0] }}</h2>
+                        <p class="text-sm text-slate-500">Here's where your college applications stand.</p>
+                    </div>
+                    <a href="{{ url_for('activities') }}" class="btn-primary btn-lg">Add an activity</a>
                 </div>
 
                 <!-- Stats Grid -->
@@ -114,174 +20,114 @@
                     </div>
                     <div class="bg-white p-5 rounded-lg border border-slate-200 shadow-sm">
                         <div class="text-xs font-semibold uppercase tracking-wider text-slate-500">Activities Logged</div>
-                        <div class="text-2xl font-bold text-indigo-600 mt-2">12</div>
-                        <div class="text-xs text-slate-500 mt-1">Common App limit: 10 entries</div>
+                        <div class="text-2xl font-bold text-indigo-600 mt-2">{{ activities|length }}</div>
+                        <div class="text-xs text-slate-500 mt-1">Common App limit: {{ max_activities }} entries</div>
                     </div>
                     <div class="bg-white p-5 rounded-lg border border-slate-200 shadow-sm">
                         <div class="text-xs font-semibold uppercase tracking-wider text-slate-500">Total Service Hours</div>
-                        <div class="text-2xl font-bold text-slate-900 mt-2">145 hrs</div>
-                        <div class="text-xs text-slate-500 mt-1">+12 hrs from last month</div>
+                        <div class="text-2xl font-bold text-slate-900 mt-2">{{ service_hours }} hrs</div>
+                        <div class="text-xs text-slate-500 mt-1">Community service, per year</div>
                     </div>
                     <div class="bg-white p-5 rounded-lg border border-slate-200 shadow-sm">
                         <div class="text-xs font-semibold uppercase tracking-wider text-slate-500">Upcoming Deadlines</div>
-                        <div class="text-2xl font-bold text-amber-600 mt-2">2</div>
-                        <div class="text-xs text-slate-500 mt-1">Next: Early Action (14 days)</div>
+                        <div class="text-2xl font-bold text-amber-600 mt-2">{{ upcoming|length }}</div>
+                        <div class="text-xs text-slate-500 mt-1">{% if upcoming %}Next: {{ upcoming[0].title }} ({{ upcoming[0].days_left }} days){% else %}Nothing coming up{% endif %}</div>
                     </div>
                 </div>
             </section>
 
-            <!-- Extracurricular Submission Section -->
-            <section id="activities" class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                
-                <!-- Activity Entry Form -->
-                <div class="lg:col-span-1 bg-white p-6 rounded-lg border border-slate-200 shadow-sm space-y-4">
-                    <div class="border-b border-slate-100 pb-3">
-                        <h3 class="text-base font-semibold text-slate-900">Add Extracurricular</h3>
-                        <p class="text-xs text-slate-500 mt-0.5">Record leadership, clubs, employment, or honors.</p>
-                    </div>
-
-                    <form id="activity-form" class="space-y-4">
-                        <div>
-                            <label for="activity-type" class="block text-xs font-medium text-slate-700 mb-1">Activity Type</label>
-                            <select id="activity-type" name="activity-type" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white">
-                                <option value="">Select activity category...</option>
-                                <option value="Academic">Academic / Research</option>
-                                <option value="Athletics">Athletics / Sports</option>
-                                <option value="Community Service">Community Service / Volunteer</option>
-                                <option value="Leadership">Student Leadership / Governance</option>
-                                <option value="Work Experience">Work Experience / Internship</option>
-                                <option value="Arts">Arts / Music / Performing</option>
-                            </select>
-                        </div>
-
-                        <div>
-                            <label for="activity-title" class="block text-xs font-medium text-slate-700 mb-1">Position / Leadership Title</label>
-                            <input type="text" id="activity-title" name="activity-title" placeholder="e.g. Club President, Volunteer Lead" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                        </div>
-
-                        <div>
-                            <label for="organization-name" class="block text-xs font-medium text-slate-700 mb-1">Organization / School Name</label>
-                            <input type="text" id="organization-name" name="organization-name" placeholder="e.g. Debate Honor Society" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-3">
-                            <div>
-                                <label for="hours-per-week" class="block text-xs font-medium text-slate-700 mb-1">Hours / Week</label>
-                                <input type="number" id="hours-per-week" name="hours-per-week" min="1" max="168" placeholder="e.g. 5" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                            </div>
-                            <div>
-                                <label for="weeks-per-year" class="block text-xs font-medium text-slate-700 mb-1">Weeks / Year</label>
-                                <input type="number" id="weeks-per-year" name="weeks-per-year" min="1" max="52" placeholder="e.g. 36" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                            </div>
-                        </div>
-
-                        <div>
-                            <label for="activity-description" class="block text-xs font-medium text-slate-700 mb-1">Description & Key Achievements</label>
-                            <textarea id="activity-description" name="activity-description" rows="3" placeholder="Summarize responsibilities, impact, and measurable achievements..." class="w-full px-3 py-2 text-sm border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none"></textarea>
-                            <p class="text-right text-xs text-slate-400 mt-1"><span id="char-count">0</span>/150 characters</p>
-                        </div>
-
-                        <button type="submit" class="w-full py-2 px-4 bg-indigo-900 hover:bg-indigo-800 text-white text-sm font-medium rounded-md transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                            Save Activity Record
-                        </button>
-                    </form>
-                </div>
-
-                <!-- Activity Log List -->
-                <div class="lg:col-span-2 bg-white p-6 rounded-lg border border-slate-200 shadow-sm flex flex-col justify-between">
-                    <div>
-                        <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
-                            <div>
-                                <h3 class="text-base font-semibold text-slate-900">Activity Log</h3>
-                                <p class="text-xs text-slate-500 mt-0.5">Recorded achievements for application export.</p>
-                            </div>
-                            <span class="text-xs bg-slate-100 text-slate-700 px-2.5 py-1 rounded font-mono">10 Maximum</span>
-                        </div>
-
-                        <!-- Dynamic List Container -->
-                        <div id="activity-log-container" class="space-y-3">
-                            <!-- Sample Entry 1 -->
-                            <div class="p-4 rounded-md border border-slate-200 bg-slate-50/50 flex flex-col sm:flex-row justify-between sm:items-center gap-3">
-                                <div>
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-xs font-semibold px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-100">Academic</span>
-                                        <h4 class="text-sm font-semibold text-slate-800">President & Lead Researcher</h4>
-                                    </div>
-                                    <p class="text-xs font-medium text-slate-600 mt-1">Science Olympiad Team</p>
-                                    <p class="text-xs text-slate-500 mt-1">Organized weekly training sessions for 25 members; placed 2nd in Regional Physics tournament.</p>
-                                </div>
-                                <div class="text-right flex-shrink-0">
-                                    <span class="text-xs font-mono text-slate-500 block">6 hrs/wk • 32 wks/yr</span>
-                                    <button class="text-xs text-red-600 hover:text-red-800 font-medium mt-2 focus:outline-none">Delete</button>
-                                </div>
-                            </div>
-
-                            <!-- Sample Entry 2 -->
-                            <div class="p-4 rounded-md border border-slate-200 bg-slate-50/50 flex flex-col sm:flex-row justify-between sm:items-center gap-3">
-                                <div>
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-xs font-semibold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-100">Community Service</span>
-                                        <h4 class="text-sm font-semibold text-slate-800">Volunteer Coordinator</h4>
-                                    </div>
-                                    <p class="text-xs font-medium text-slate-600 mt-1">Metropolitan Food Bank</p>
-                                    <p class="text-xs text-slate-500 mt-1">Managed weekend distribution schedules and meal inventory logistics for over 400 families.</p>
-                                </div>
-                                <div class="text-right flex-shrink-0">
-                                    <span class="text-xs font-mono text-slate-500 block">4 hrs/wk • 48 wks/yr</span>
-                                    <button class="text-xs text-red-600 hover:text-red-800 font-medium mt-2 focus:outline-none">Delete</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="mt-6 pt-4 border-t border-slate-100 flex justify-end">
-                        <button id="export-activities" class="px-4 py-2 border border-slate-300 text-slate-700 hover:bg-slate-50 text-sm font-medium rounded-md transition-colors focus:outline-none">
-                            Export Summary (PDF)
-                        </button>
-                    </div>
-                </div>
+            <!-- Quick Links -->
+            <section class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {% for endpoint, title, desc in [
+                    ('activities', 'Activity Log', 'Add and review your extracurriculars.'),
+                    ('calendar', 'Deadlines & Calendar', 'Keep track of application milestones.'),
+                    ('resume', 'Resume Builder', 'Compile your achievements into a resume.')] %}
+                <a href="{{ url_for(endpoint) }}" class="block bg-white p-5 rounded-lg border border-slate-200 shadow-sm hover:border-indigo-400 hover:shadow transition">
+                    <h3 class="text-base font-semibold text-slate-900">{{ title }} <span class="text-indigo-600">&rarr;</span></h3>
+                    <p class="text-xs text-slate-500 mt-1">{{ desc }}</p>
+                </a>
+                {% endfor %}
             </section>
 
-            <!-- Calendar & Deadlines Module Placeholder -->
-            <section id="calendar" class="bg-white p-6 rounded-lg border border-slate-200 shadow-sm space-y-4">
+            <!-- Recent Activity & Upcoming Deadlines -->
+            <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-white p-6 rounded-lg border border-slate-200 shadow-sm">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+                        <h3 class="text-base font-semibold text-slate-900">Recent Activities</h3>
+                        <a href="{{ url_for('activities') }}" class="text-xs font-medium text-indigo-600 hover:text-indigo-800">View all</a>
+                    </div>
+                    <ul class="space-y-3 text-sm">
+                        {% for a in activities[:3] %}
+                        <li class="flex justify-between"><span class="text-slate-800">{{ a.title }} <span class="text-slate-500">· {{ a.organization }}</span></span><span class="text-xs font-mono text-slate-500">{{ a.hours_per_week }} hrs/wk</span></li>
+                        {% else %}
+                        <li class="text-slate-500">No activities yet. <a href="{{ url_for('activities') }}" class="text-indigo-600">Add one</a>.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <div class="bg-white p-6 rounded-lg border border-slate-200 shadow-sm">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+                        <h3 class="text-base font-semibold text-slate-900">Upcoming Deadlines</h3>
+                        <a href="{{ url_for('calendar') }}" class="text-xs font-medium text-indigo-600 hover:text-indigo-800">View calendar</a>
+                    </div>
+                    <ul class="space-y-3 text-sm">
+                        {% for d in upcoming[:3] %}
+                        <li class="flex justify-between"><span class="text-slate-800">{{ d.title }}</span><span class="text-xs font-medium {{ 'text-amber-600' if d.days_left <= 14 else 'text-slate-500' }}">{{ 'today' if d.days_left == 0 else 'in %d days' % d.days_left }}</span></li>
+                        {% else %}
+                        <li class="text-slate-500">No upcoming deadlines. <a href="{{ url_for('calendar') }}" class="text-indigo-600">Add one</a>.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </section>
+            <!-- QR Event Scanner -->
+            <section id="qr-scanner" class="bg-white p-6 rounded-lg border border-slate-200 shadow-sm space-y-4">
                 <div class="flex items-center justify-between border-b border-slate-100 pb-3">
                     <div>
-                        <h3 class="text-base font-semibold text-slate-900">Application Calendar & Deadlines</h3>
-                        <p class="text-xs text-slate-500 mt-0.5">Key admission, recommendation letter, and testing milestones.</p>
+                        <h3 class="text-base font-semibold text-slate-900">QR Event Scanner</h3>
+                        <p class="text-xs text-slate-500 mt-0.5">Scan an event QR code with your camera to check in.</p>
                     </div>
-                    <button class="text-xs bg-slate-900 text-white px-3 py-1.5 rounded-md hover:bg-slate-800 transition-colors">
-                        Add Custom Deadline
-                    </button>
+                    <button id="qr-toggle" type="button" class="btn-secondary btn-sm">Start Scanner</button>
                 </div>
-                
-                <div class="p-8 border-2 border-dashed border-slate-200 rounded-lg text-center bg-slate-50/50">
-                    <p class="text-sm font-medium text-slate-600">Calendar view module space.</p>
-                    <p class="text-xs text-slate-400 mt-1">Integrates with external submission dates and standard application platforms.</p>
-                </div>
+                <div id="qr-reader" class="max-w-sm mx-auto hidden"></div>
+                <div id="qr-result" class="text-sm text-slate-600 text-center">No code scanned yet.</div>
             </section>
+{% endblock %}
 
-            <!-- Resume Builder Module Placeholder -->
-            <section id="resume" class="bg-white p-6 rounded-lg border border-slate-200 shadow-sm space-y-4 mb-8">
-                <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-                    <div>
-                        <h3 class="text-base font-semibold text-slate-900">High School Resume Document</h3>
-                        <p class="text-xs text-slate-500 mt-0.5">Automated resume compilation based on recorded achievements and academics.</p>
-                    </div>
-                    <button class="text-xs border border-slate-300 text-slate-700 px-3 py-1.5 rounded-md hover:bg-slate-50 transition-colors">
-                        Generate Draft
-                    </button>
-                </div>
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+<script>
+(() => {
+    const btn = document.querySelector("#qr-toggle");
+    const reader = document.querySelector("#qr-reader");
+    const result = document.querySelector("#qr-result");
+    let scanner = null;
 
-                <div class="p-8 border-2 border-dashed border-slate-200 rounded-lg text-center bg-slate-50/50">
-                    <p class="text-sm font-medium text-slate-600">Resume builder module space.</p>
-                    <p class="text-xs text-slate-400 mt-1">Formats academic records, standardized tests, and extracurriculars into standard ATS formats.</p>
-                </div>
-            </section>
+    const stop = async () => {
+        if (scanner) { try { await scanner.stop(); } catch (e) {} scanner = null; }
+        reader.classList.add("hidden");
+        btn.textContent = "Start Scanner";
+    };
 
-        </main>
-    </div>
-
-    <!-- External JavaScript file reference -->
-    <script src="static/js/script.js"></script>
-</body>
-</html>
+    btn.addEventListener("click", async () => {
+        if (scanner) return stop();
+        reader.classList.remove("hidden");
+        btn.textContent = "Stop Scanner";
+        scanner = new Html5Qrcode("qr-reader");
+        try {
+            await scanner.start(
+                { facingMode: "environment" },
+                { fps: 10, qrbox: 220 },
+                (text) => {
+                    result.textContent = "Scanned: " + text;
+                    stop();
+                }
+            );
+        } catch (err) {
+            result.textContent = "Could not access the camera. Allow camera permission and try again.";
+            scanner = null;
+            stop();
+        }
+    });
+})();
+</script>
+{% endblock %}

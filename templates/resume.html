@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block title %}Resume Builder{% endblock %}
+{% block content %}
+            <header class="space-y-1">
+                <h2>Resume Builder</h2>
+                <p class="text-sm text-slate-500">Turn your recorded activities into a clean resume draft.</p>
+            </header>
+
+            <section id="resume" class="bg-white p-6 rounded-lg border border-slate-200 shadow-sm space-y-4 mb-8">
+                <div class="no-print flex items-center justify-between border-b border-slate-100 pb-3">
+                    <div>
+                        <h3 class="text-base font-semibold text-slate-900">High School Resume Document</h3>
+                        <p class="text-xs text-slate-500 mt-0.5">Automated resume compilation based on recorded achievements and academics.</p>
+                    </div>
+                    <div class="flex gap-2">
+                        {% if draft %}
+                        <button type="button" data-print class="btn-secondary btn-sm">Print / Save as PDF</button>
+                        {% endif %}
+                        <a href="{{ url_for('resume', draft=1) }}" class="btn-primary btn-sm">{{ 'Regenerate Draft' if draft else 'Generate Draft' }}</a>
+                    </div>
+                </div>
+
+                {% if draft %}
+                <div class="max-w-2xl mx-auto py-4">
+                    <h2 class="text-xl font-bold border-b border-slate-300 pb-1 mb-4">Activities &amp; Experience</h2>
+                    {% for category, items in grouped.items() %}
+                    <h3 class="text-sm font-semibold uppercase tracking-wider text-slate-500 mt-4 mb-2">{{ category }}</h3>
+                    {% for a in items %}
+                    <div class="mb-3">
+                        <div class="text-sm"><span class="font-semibold">{{ a.title }}</span>, {{ a.organization }}</div>
+                        <div class="text-xs text-slate-500">{{ a.hours_per_week }} hrs/wk · {{ a.weeks_per_year }} wks/yr</div>
+                        {% if a.description %}<div class="text-sm mt-0.5">{{ a.description }}</div>{% endif %}
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <p class="text-sm text-slate-500">No activities yet. <a href="{{ url_for('activities') }}" class="text-indigo-600">Add some</a> first.</p>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="p-8 border-2 border-dashed border-slate-200 rounded-lg text-center bg-slate-50/50">
+                    <p class="text-sm font-medium text-slate-600">No draft yet.</p>
+                    <p class="text-xs text-slate-400 mt-1">Click Generate Draft to build a resume from your recorded activities.</p>
+                </div>
+                {% endif %}
+            </section>
+{% endblock %}

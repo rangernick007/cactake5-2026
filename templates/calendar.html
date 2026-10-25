@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% block title %}Deadlines & Calendar{% endblock %}
+{% block content %}
+            <header class="space-y-1">
+                <h2>Deadlines & Calendar</h2>
+                <p class="text-sm text-slate-500">Key admission, recommendation and testing milestones, synced to your calendar.</p>
+            </header>
+
+            <!-- Deadlines -->
+            <section id="calendar" class="bg-white p-6 rounded-lg border border-slate-200 shadow-sm space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <div>
+                        <h3 class="text-base font-semibold text-slate-900">Application Calendar & Deadlines</h3>
+                        <p class="text-xs text-slate-500 mt-0.5">Key admission, recommendation letter, and testing milestones.</p>
+                    </div>
+                    <button id="deadline-toggle" type="button" class="btn-primary btn-sm">
+                        Add Custom Deadline
+                    </button>
+                </div>
+                
+                <form id="deadline-form" method="post" action="{{ url_for('add_deadline') }}" class="hidden grid grid-cols-1 sm:grid-cols-4 gap-3 p-4 rounded-md bg-slate-50 border border-slate-200">
+<input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                    <input type="text" name="deadline-title" required maxlength="100" placeholder="Deadline title" class="sm:col-span-2 px-3 py-2 text-sm border border-slate-300 rounded-md">
+                    <input type="date" name="deadline-date" required class="px-3 py-2 text-sm border border-slate-300 rounded-md">
+                    <button type="submit" class="btn-primary btn-sm">Save Deadline</button>
+                    <input type="text" name="deadline-details" maxlength="200" placeholder="Notes (optional)" class="sm:col-span-4 px-3 py-2 text-sm border border-slate-300 rounded-md">
+                </form>
+
+                <ul class="divide-y divide-slate-100">
+                    {% for e in events %}
+                    <li class="py-3 flex flex-wrap items-center justify-between gap-2 text-sm">
+                        <span><span class="font-medium text-slate-800">{{ e.title }}</span>
+                            <span class="text-slate-500">· {{ e.date.strftime('%b %d, %Y') }}</span></span>
+                        <span class="flex items-center gap-4">
+                            <a href="{{ e.google_url }}" target="_blank" rel="noopener" class="text-xs font-medium text-indigo-600 hover:text-indigo-800">Add to Google Calendar</a>
+                            <form method="post" action="{{ url_for('delete_deadline', deadline_id=e.id) }}" onsubmit="return confirm('Delete this deadline?');">
+<input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                                <button type="submit" class="text-xs font-medium text-red-600 hover:text-red-800">Delete</button>
+                            </form>
+                        </span>
+                    </li>
+                    {% else %}
+                    <li class="py-6 text-sm text-slate-500 text-center">No deadlines yet.</li>
+                    {% endfor %}
+                </ul>
+            </section>
+
+            <section id="connect-calendar" class="bg-white p-6 rounded-lg border border-slate-200 shadow-sm space-y-4">
+                <div class="border-b border-slate-100 pb-3">
+                    <h3 class="text-base font-semibold text-slate-900">Connect Your Calendar</h3>
+                    <p class="text-xs text-slate-500 mt-0.5">Subscribe so your deadlines show up in Apple or Google Calendar.</p>
+                </div>
+                <div class="flex flex-wrap gap-3">
+                    <a href="{{ feed_webcal }}" class="btn-secondary btn-sm">Connect Apple Calendar</a>
+                    <a href="{{ google_subscribe }}" target="_blank" rel="noopener" class="btn-secondary btn-sm">Connect Google Calendar</a>
+                    <a href="{{ url_for('calendar_ics', token=current_user.feed_token) }}" download="deadlines.ics" class="btn-secondary btn-sm">Download .ics file</a>
+                </div>
+                <p class="text-xs text-slate-500">Feed URL: <span class="font-mono">{{ feed_webcal }}</span></p>
+                <p class="text-xs text-amber-700">Google Calendar can only subscribe to a publicly reachable address. While running on localhost, use the .ics download or the per-deadline "Add to Google Calendar" links instead.</p>
+            </section>
+{% endblock %}
