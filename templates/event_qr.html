@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}{{ ev.title }} QR{% endblock %}
+{% block content %}
+            <div class="no-print"><a href="{{ url_for('events') }}" class="text-sm text-indigo-600">&larr; All events</a></div>
+
+            <section class="max-w-md mx-auto w-full bg-white p-8 rounded-lg border border-slate-200 shadow-sm text-center space-y-4">
+                <h2 style="font-size:24px">{{ ev.title }}</h2>
+                <p class="text-sm text-slate-500">{{ ev.organization }}{% if ev.event_date %} · {{ ev.event_date }}{% endif %} · {{ ev.hours }} hr{{ '' if ev.hours == 1 else 's' }}</p>
+                <img src="{{ url_for('event_qr_svg', event_id=ev.id) }}" alt="QR code to check in to {{ ev.title }}" class="mx-auto" style="width:280px;height:280px">
+                <p class="text-sm font-medium text-slate-700">Scan to add this event to your Activity Log</p>
+                <div class="no-print space-y-3">
+                    <div class="flex justify-center gap-2">
+                        <button type="button" data-print class="btn-primary btn-sm">Print</button>
+                        <a href="{{ url_for('event_qr_svg', event_id=ev.id) }}" download="{{ ev.title|replace(' ', '-') }}-qr.svg" class="btn-secondary btn-sm">Download SVG</a>
+                    </div>
+                    <p class="text-xs text-slate-500">{{ checkins }} check-in{{ '' if checkins == 1 else 's' }} so far</p>
+                    <p class="text-xs text-slate-400 break-all">Link inside the code: <span class="font-mono">{{ url }}</span></p>
+                    {% if 'localhost' in url or '127.0.0.1' in url %}
+                    <p class="text-xs text-amber-700">This code points to your own computer, so phones can't open it. It works with the scanner on this computer. To let others scan it, run the site at a public address and set PUBLIC_BASE_URL.</p>
+                    {% endif %}
+                </div>
+            </section>
+{% endblock %}

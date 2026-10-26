@@ -41,7 +41,7 @@
             <!-- Toolbar with segmented navigation -->
             <nav class="toolbar no-print" aria-label="Main">
                 <div class="segmented">
-                    {% for endpoint, label in [('home', 'Dashboard'), ('activities', 'Activity Log'), ('calendar', 'Calendar'), ('resume', 'Resume'), ('opportunities', 'Opportunities')] %}
+                    {% for endpoint, label in [('home', 'Dashboard'), ('activities', 'Activity Log'), ('calendar', 'Calendar'), ('resume', 'Resume'), ('opportunities', 'Opportunities'), ('events', 'Organize')] %}
                     <a href="{{ url_for(endpoint) }}" {% if request.endpoint == endpoint %}aria-current="page" class="active"{% endif %}>{{ label }}</a>
                     {% endfor %}
                 </div>

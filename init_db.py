@@ -92,6 +92,27 @@ def init_db():
             "INSERT INTO opportunities (title, organization, category, format, location, description, url) "
             "VALUES (?, ?, ?, ?, ?, ?, ?)", SEED_OPPORTUNITIES)
 
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS events (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            organizer_id INTEGER NOT NULL REFERENCES users(id),
+            token TEXT NOT NULL UNIQUE,
+            title TEXT NOT NULL,
+            organization TEXT NOT NULL,
+            category TEXT NOT NULL,
+            event_date TEXT,
+            hours INTEGER NOT NULL,
+            description TEXT
+        )
+    ''')
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS event_checkins (
+            event_id INTEGER NOT NULL REFERENCES events(id) ON DELETE CASCADE,
+            user_id INTEGER NOT NULL REFERENCES users(id),
+            PRIMARY KEY (event_id, user_id)
+        )
+    ''')
+
     # Each user owns their own rows
     for table in ("activities", "deadlines"):
         cols = {row[1] for row in cursor.execute(f"PRAGMA table_info({table})")}

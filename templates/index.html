@@ -84,7 +84,7 @@
                 <div class="flex items-center justify-between border-b border-slate-100 pb-3">
                     <div>
                         <h3 class="text-base font-semibold text-slate-900">QR Event Scanner</h3>
-                        <p class="text-xs text-slate-500 mt-0.5">Scan an event QR code with your camera to check in.</p>
+                        <p class="text-xs text-slate-500 mt-0.5">Scan an event QR code with your camera to add it to your Activity Log.</p>
                     </div>
                     <button id="qr-toggle" type="button" class="btn-secondary btn-sm">Start Scanner</button>
                 </div>
@@ -118,6 +118,14 @@
                 { facingMode: "environment" },
                 { fps: 10, qrbox: 220 },
                 (text) => {
+                    // Collegia event QR codes end in /checkin/<token>; open that page on this site
+                    const m = text.match(/\/checkin\/([A-Za-z0-9_-]{16,64})$/);
+                    if (m) {
+                        result.textContent = "Event found. Opening check-in…";
+                        stop();
+                        window.location.assign("/checkin/" + m[1]);
+                        return;
+                    }
                     result.textContent = "Scanned: " + text;
                     stop();
                 }

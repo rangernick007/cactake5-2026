@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block title %}Event Check-in{% endblock %}
+{% block content %}
+            <section class="max-w-md mx-auto my-auto w-full bg-white p-8 rounded-lg border border-slate-200 shadow-sm space-y-4 text-center">
+                <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Event check-in</p>
+                <h2 style="font-size:26px">{{ ev.title }}</h2>
+                <p class="text-sm text-slate-500">{{ ev.organization }} · {{ ev.category }}{% if ev.event_date %} · {{ ev.event_date }}{% endif %}</p>
+                <p class="text-sm text-slate-700">{{ ev.hours }} hour{{ '' if ev.hours == 1 else 's' }} of activity time{% if ev.description %}<br>{{ ev.description }}{% endif %}</p>
+                {% if done %}
+                <p class="text-sm font-medium text-emerald-700">&#10003; Already in your Activity Log.</p>
+                <a href="{{ url_for('activities') }}" class="btn-secondary btn-lg inline-block">Open Activity Log</a>
+                {% else %}
+                <form method="post" action="{{ url_for('checkin', token=ev.token) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                    <button type="submit" class="btn-primary btn-lg w-full">Add to my Activity Log</button>
+                </form>
+                {% endif %}
+            </section>
+{% endblock %}

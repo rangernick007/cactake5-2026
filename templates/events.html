@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block title %}Organize an Event{% endblock %}
+{% block content %}
+            <header class="space-y-1">
+                <h2>Organize an Event</h2>
+                <p class="text-sm text-slate-500">Running a club meeting, service day or workshop? Create a QR code. Attendees scan it and the event lands in their Activity Log.</p>
+            </header>
+
+            <section class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+                <form method="post" action="{{ url_for('add_event') }}" class="lg:col-span-1 bg-white p-6 rounded-lg border border-slate-200 shadow-sm space-y-3">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                    <h3 class="text-base font-semibold text-slate-900">New event</h3>
+                    <input type="text" name="title" required maxlength="100" placeholder="Event name, e.g. Beach Cleanup Day" class="w-full">
+                    <input type="text" name="organization" required maxlength="100" placeholder="Your organization or club" class="w-full">
+                    <select name="category" required aria-label="Category" class="w-full">
+                        {% for c in categories %}<option>{{ c }}</option>{% endfor %}
+                    </select>
+                    <div class="grid grid-cols-2 gap-3">
+                        <input type="number" name="hours" required min="1" max="200" placeholder="Hours credited" aria-label="Hours credited" class="w-full">
+                        <input type="date" name="event-date" aria-label="Event date (optional)" class="w-full">
+                    </div>
+                    <textarea name="description" rows="3" maxlength="150" placeholder="What attendees did (shown in their log, 150 chars)" class="w-full resize-none"></textarea>
+                    <button type="submit" class="btn-primary btn-lg w-full">Create QR code</button>
+                </form>
+
+                <div class="lg:col-span-2 space-y-3">
+                    {% for ev in rows %}
+                    <article class="bg-white p-5 rounded-lg border border-slate-200 shadow-sm flex flex-wrap items-center justify-between gap-4">
+                        <div class="min-w-0">
+                            <h3 class="text-base font-semibold text-slate-900">{{ ev.title }}</h3>
+                            <p class="text-xs text-slate-500">{{ ev.organization }} · {{ ev.category }} · {{ ev.hours }} hr{{ '' if ev.hours == 1 else 's' }}{% if ev.event_date %} · {{ ev.event_date }}{% endif %}</p>
+                            <p class="text-xs text-slate-500 mt-1">{{ ev.checkins }} check-in{{ '' if ev.checkins == 1 else 's' }}</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <a href="{{ url_for('event_qr', event_id=ev.id) }}" class="btn-primary btn-sm">Show QR code</a>
+                            <form method="post" action="{{ url_for('delete_event', event_id=ev.id) }}" onsubmit="return confirm('Delete this event? Its QR code will stop working.');">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                                <button type="submit" class="btn-secondary btn-sm">Delete</button>
+                            </form>
+                        </div>
+                    </article>
+                    {% else %}
+                    <div class="bg-white p-8 rounded-lg border border-slate-200 shadow-sm text-center text-sm text-slate-500">No events yet. Create your first one on the left.</div>
+                    {% endfor %}
+                </div>
+            </section>
+{% endblock %}

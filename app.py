@@ -11,6 +11,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from init_db import DB_PATH, init_db
 import recommender
+from events import init_events
 
 app = Flask(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -75,8 +76,17 @@ def login_required(view):
     return wrapped
 
 
+def after_login_url():
+    """Where to go after logging in: back to a pending QR check-in, else the dashboard."""
+    token = session.get("pending_checkin")
+    return url_for("checkin", token=token) if token else url_for("home")
+
+
 def start_session(user_id):
+    pending = session.get("pending_checkin")
     session.clear()  # new session on login prevents fixation
+    if pending:
+        session["pending_checkin"] = pending
     session["user_id"] = user_id
     session["csrf_token"] = secrets.token_hex(16)
 
@@ -106,7 +116,7 @@ def register():
                         for table in ("activities", "deadlines"):
                             conn.execute(f"UPDATE {table} SET user_id = ? WHERE user_id IS NULL", (cur.lastrowid,))
                 start_session(cur.lastrowid)
-                return redirect(url_for("home"))
+                return redirect(after_login_url())
             except sqlite3.IntegrityError:
                 flash("An account with that email already exists. Try logging in.", "error")
     return render_template("register.html")
@@ -122,7 +132,7 @@ def login():
             user = conn.execute("SELECT * FROM users WHERE email = ?", (email,)).fetchone()
         if user and check_password_hash(user["password_hash"], request.form.get("password", "")):
             start_session(user["id"])
-            return redirect(url_for("home"))
+            return redirect(after_login_url())
         flash("Incorrect email or password.", "error")
     return render_template("login.html")
 
@@ -417,6 +427,9 @@ def run_ai_picks():
 @login_required
 def recommendations():
     return redirect(url_for("opportunities"))
+
+
+init_events(app, get_db_connection, login_required, CATEGORIES, MAX_ACTIVITIES)
 
 
 if __name__ == "__main__":
