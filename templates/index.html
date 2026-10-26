@@ -6,11 +6,54 @@
                 <div class="flex flex-wrap items-end justify-between gap-6">
                     <div class="space-y-1">
                         <h2>Welcome back, {{ current_user.name.split()[0] }}</h2>
-                        <p class="text-sm text-slate-500">Here's where your college applications stand.</p>
+                        <p class="text-sm text-slate-500">{% if current_user.role == 'organizer' %}Run your events and see who checked in.{% else %}Here's where your college applications stand.{% endif %}</p>
                     </div>
-                    <a href="{{ url_for('activities') }}" class="btn-primary btn-lg">Add an activity</a>
+                    {% if current_user.role == 'organizer' %}<a href="{{ url_for('events') }}" class="btn-primary btn-lg">Create an event</a>
+                    {% else %}<a href="{{ url_for('activities') }}" class="btn-primary btn-lg">Add an activity</a>{% endif %}
+                </div>
+                <!-- Role selector -->
+                <div class="flex flex-wrap items-center gap-3">
+                    <span class="text-sm text-slate-500">I'm using Collegia as a:</span>
+                    <form method="post" action="{{ url_for('set_role') }}" class="segmented" role="group" aria-label="Account type">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                        {% for value, label in [('student', 'Student'), ('organizer', 'Organizer')] %}
+                        <button type="submit" name="role" value="{{ value }}" {% if current_user.role == value %}aria-pressed="true" class="role-btn active"{% else %}aria-pressed="false" class="role-btn"{% endif %}>{{ label }}</button>
+                        {% endfor %}
+                    </form>
+                    <span class="text-xs text-slate-400">{% if current_user.role == 'organizer' %}Organizers create events and QR codes.{% else %}Students log activities and scan event codes.{% endif %}</span>
                 </div>
 
+                {% if current_user.role == 'organizer' %}
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="bg-white p-5 rounded-lg border border-slate-200 shadow-sm">
+                        <div class="text-xs font-semibold uppercase tracking-wider text-slate-500">Events Created</div>
+                        <div class="text-2xl font-bold text-indigo-600 mt-2">{{ events_count }}</div>
+                        <div class="text-xs text-slate-500 mt-1">Each has its own QR code</div>
+                    </div>
+                    <div class="bg-white p-5 rounded-lg border border-slate-200 shadow-sm">
+                        <div class="text-xs font-semibold uppercase tracking-wider text-slate-500">Student Check-ins</div>
+                        <div class="text-2xl font-bold text-slate-900 mt-2">{{ checkins }}</div>
+                        <div class="text-xs text-slate-500 mt-1">Across all your events</div>
+                    </div>
+                    <div class="bg-white p-5 rounded-lg border border-slate-200 shadow-sm">
+                        <div class="text-xs font-semibold uppercase tracking-wider text-slate-500">Upcoming Deadlines</div>
+                        <div class="text-2xl font-bold text-amber-600 mt-2">{{ upcoming|length }}</div>
+                        <div class="text-xs text-slate-500 mt-1">{% if upcoming %}Next: {{ upcoming[0].title }} ({{ upcoming[0].days_left }} days){% else %}Nothing coming up{% endif %}</div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <a href="{{ url_for('events') }}" class="block bg-white p-5 rounded-lg border border-slate-200 shadow-sm">
+                    <h3 class="text-base font-semibold text-slate-900">Organize <span class="text-indigo-600">&rarr;</span></h3>
+                    <p class="text-xs text-slate-500 mt-1">Create an event and get a QR code for attendees.</p>
+                </a>
+                <a href="{{ url_for('calendar') }}" class="block bg-white p-5 rounded-lg border border-slate-200 shadow-sm">
+                    <h3 class="text-base font-semibold text-slate-900">Deadlines &amp; Calendar <span class="text-indigo-600">&rarr;</span></h3>
+                    <p class="text-xs text-slate-500 mt-1">Keep track of milestones and sync them to your calendar.</p>
+                </a>
+            </section>
+                {% else %}
                 <!-- Stats Grid -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div class="bg-white p-5 rounded-lg border border-slate-200 shadow-sm">
@@ -35,6 +78,7 @@
                     </div>
                 </div>
             </section>
+
 
             <!-- Quick Links -->
             <section class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -91,9 +135,10 @@
                 <div id="qr-reader" class="max-w-sm mx-auto hidden"></div>
                 <div id="qr-result" class="text-sm text-slate-600 text-center">No code scanned yet.</div>
             </section>
+                {% endif %}
 {% endblock %}
 
-{% block scripts %}
+{% block scripts %}{% if current_user.role == 'student' %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
 <script>
 (() => {
@@ -138,4 +183,4 @@
     });
 })();
 </script>
-{% endblock %}
+{% endif %}{% endblock %}

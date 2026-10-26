@@ -18,7 +18,7 @@ MAX_EVENTS_PER_USER = 50
 TOKEN_RE = re.compile(r"^[A-Za-z0-9_-]{16,64}$")
 
 
-def init_events(app, get_db_connection, login_required, categories, max_activities):
+def init_events(app, get_db_connection, login_required, role_required, categories, max_activities):
 
     def checkin_url(token):
         base = os.environ.get("PUBLIC_BASE_URL", "").rstrip("/") or request.url_root.rstrip("/")
@@ -34,6 +34,7 @@ def init_events(app, get_db_connection, login_required, categories, max_activiti
 
     @app.route("/events")
     @login_required
+    @role_required("organizer")
     def events():
         with get_db_connection() as conn:
             rows = conn.execute(
@@ -43,6 +44,7 @@ def init_events(app, get_db_connection, login_required, categories, max_activiti
 
     @app.route("/events/add", methods=["POST"])
     @login_required
+    @role_required("organizer")
     def add_event():
         f = request.form
         title, org = f.get("title", "").strip()[:100], f.get("organization", "").strip()[:100]
@@ -78,6 +80,7 @@ def init_events(app, get_db_connection, login_required, categories, max_activiti
 
     @app.route("/events/<int:event_id>")
     @login_required
+    @role_required("organizer")
     def event_qr(event_id):
         ev = own_event(event_id)
         with get_db_connection() as conn:
@@ -87,6 +90,7 @@ def init_events(app, get_db_connection, login_required, categories, max_activiti
 
     @app.route("/events/<int:event_id>/qr.svg")
     @login_required
+    @role_required("organizer")
     def event_qr_svg(event_id):
         ev = own_event(event_id)
         img = qrcode.make(checkin_url(ev["token"]), image_factory=qrcode.image.svg.SvgPathImage,
@@ -98,6 +102,7 @@ def init_events(app, get_db_connection, login_required, categories, max_activiti
 
     @app.route("/events/<int:event_id>/delete", methods=["POST"])
     @login_required
+    @role_required("organizer")
     def delete_event(event_id):
         own_event(event_id)
         with get_db_connection() as conn:
@@ -115,6 +120,9 @@ def init_events(app, get_db_connection, login_required, categories, max_activiti
             flash("Log in or create an account to add this event to your Activity Log.", "success")
             return redirect(url_for("login"))
         session.pop("pending_checkin", None)
+        if g.user["role"] != "student":
+            flash("Event check-in is for students. Switch your role to Student on the dashboard to scan this code.", "error")
+            return redirect(url_for("home"))
         with get_db_connection() as conn:
             ev = conn.execute("SELECT * FROM events WHERE token = ?", (token,)).fetchone()
             if ev is None:

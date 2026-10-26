@@ -10,6 +10,12 @@
     <script src="https://cdn.tailwindcss.com"></script>
 
     <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='img/logo.svg') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='img/apple-touch-icon.png') }}">
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.webmanifest') }}">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Collegia">
+    <meta name="theme-color" content="#f6f6f8">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body class="app-bg">
@@ -41,7 +47,9 @@
             <!-- Toolbar with segmented navigation -->
             <nav class="toolbar no-print" aria-label="Main">
                 <div class="segmented">
-                    {% for endpoint, label in [('home', 'Dashboard'), ('activities', 'Activity Log'), ('calendar', 'Calendar'), ('resume', 'Resume'), ('opportunities', 'Opportunities'), ('events', 'Organize')] %}
+                    {% if current_user.role == 'organizer' %}{% set tabs = [('home', 'Dashboard'), ('calendar', 'Calendar'), ('events', 'Organize')] %}
+                    {% else %}{% set tabs = [('home', 'Dashboard'), ('activities', 'Activity Log'), ('calendar', 'Calendar'), ('resume', 'Resume'), ('opportunities', 'Opportunities')] %}{% endif %}
+                    {% for endpoint, label in tabs %}
                     <a href="{{ url_for(endpoint) }}" {% if request.endpoint == endpoint %}aria-current="page" class="active"{% endif %}>{{ label }}</a>
                     {% endfor %}
                 </div>

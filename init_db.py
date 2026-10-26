@@ -113,6 +113,11 @@ def init_db():
         )
     ''')
 
+    # Account type chosen on the dashboard: 'student' or 'organizer'
+    user_cols = {row[1] for row in cursor.execute("PRAGMA table_info(users)")}
+    if "role" not in user_cols:
+        cursor.execute("ALTER TABLE users ADD COLUMN role TEXT NOT NULL DEFAULT 'student'")
+
     # Each user owns their own rows
     for table in ("activities", "deadlines"):
         cols = {row[1] for row in cursor.execute(f"PRAGMA table_info({table})")}

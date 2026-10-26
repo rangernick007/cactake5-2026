@@ -1,0 +1,12 @@
+{
+  "name": "Collegia",
+  "short_name": "Collegia",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f2f3f7",
+  "theme_color": "#f6f6f8",
+  "icons": [
+    {"src": "/static/img/icon-192.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "/static/img/icon-512.png", "sizes": "512x512", "type": "image/png"}
+  ]
+}

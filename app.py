@@ -76,6 +76,19 @@ def login_required(view):
     return wrapped
 
 
+def role_required(role):
+    """Use under @login_required. Sends people with the other role back to the dashboard."""
+    def decorator(view):
+        @wraps(view)
+        def wrapped(*args, **kwargs):
+            if g.user["role"] != role:
+                flash(f"That page is only available to {role}s. Switch your role on the dashboard to use it.", "error")
+                return redirect(url_for("home"))
+            return view(*args, **kwargs)
+        return wrapped
+    return decorator
+
+
 def after_login_url():
     """Where to go after logging in: back to a pending QR check-in, else the dashboard."""
     token = session.get("pending_checkin")
@@ -99,7 +112,10 @@ def register():
         name = request.form.get("name", "").strip()
         email = request.form.get("email", "").strip().lower()
         password = request.form.get("password", "")
-        if not name or "@" not in email or "." not in email.split("@")[-1]:
+        role = request.form.get("role", "")
+        if role not in ("student", "organizer"):
+            flash("Please choose whether you're a student or an organizer.", "error")
+        elif not name or "@" not in email or "." not in email.split("@")[-1]:
             flash("Please enter your name and a valid email address.", "error")
         elif len(password) < 8:
             flash("Password must be at least 8 characters.", "error")
@@ -110,8 +126,8 @@ def register():
                 with get_db_connection() as conn:
                     first_user = conn.execute("SELECT COUNT(*) FROM users").fetchone()[0] == 0
                     cur = conn.execute(
-                        "INSERT INTO users (name, email, password_hash, feed_token) VALUES (?, ?, ?, ?)",
-                        (name, email, generate_password_hash(password), secrets.token_urlsafe(24)))
+                        "INSERT INTO users (name, email, password_hash, feed_token, role) VALUES (?, ?, ?, ?, ?)",
+                        (name, email, generate_password_hash(password), secrets.token_urlsafe(24), role))
                     if first_user:  # the first account adopts data saved before accounts existed
                         for table in ("activities", "deadlines"):
                             conn.execute(f"UPDATE {table} SET user_id = ? WHERE user_id IS NULL", (cur.lastrowid,))
@@ -119,7 +135,9 @@ def register():
                 return redirect(after_login_url())
             except sqlite3.IntegrityError:
                 flash("An account with that email already exists. Try logging in.", "error")
-    return render_template("register.html")
+    # People arriving from an event QR code are almost certainly students
+    chosen = request.form.get("role") or ("student" if session.get("pending_checkin") else "")
+    return render_template("register.html", chosen_role=chosen)
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -162,19 +180,40 @@ def fetch_deadlines():
 @app.route("/")
 @login_required
 def home():
-    activities = fetch_activities()
     deadlines = fetch_deadlines()
     upcoming = [d for d in deadlines if d["days_left"] >= 0]
+    if g.user["role"] == "organizer":
+        with get_db_connection() as conn:
+            events_count = conn.execute("SELECT COUNT(*) FROM events WHERE organizer_id = ?",
+                                        (g.user["id"],)).fetchone()[0]
+            checkins = conn.execute(
+                "SELECT COUNT(*) FROM event_checkins c JOIN events e ON e.id = c.event_id "
+                "WHERE e.organizer_id = ?", (g.user["id"],)).fetchone()[0]
+        return render_template("index.html", upcoming=upcoming, events_count=events_count, checkins=checkins)
+    activities = fetch_activities()
     service_hours = sum((a["hours_per_week"] or 0) * (a["weeks_per_year"] or 0)
                         for a in activities if a["category"] == "Community Service")
     return render_template("index.html", activities=activities, upcoming=upcoming,
                            service_hours=service_hours, max_activities=MAX_ACTIVITIES)
 
 
+@app.route("/role", methods=["POST"])
+@login_required
+def set_role():
+    role = request.form.get("role", "")
+    if role not in ("student", "organizer"):
+        abort(400)
+    with get_db_connection() as conn:
+        conn.execute("UPDATE users SET role = ? WHERE id = ?", (role, g.user["id"]))
+    flash(f"You're now using Collegia as {'an organizer' if role == 'organizer' else 'a student'}.", "success")
+    return redirect(url_for("home"))
+
+
 # ---------- Activities ----------
 
 @app.route("/activities")
 @login_required
+@role_required("student")
 def activities():
     return render_template("activities.html", activities=fetch_activities(),
                            categories=CATEGORIES, max_activities=MAX_ACTIVITIES)
@@ -182,6 +221,7 @@ def activities():
 
 @app.route("/activities/add", methods=["POST"])
 @login_required
+@role_required("student")
 def add_activity():
     f = request.form
     category = f.get("activity-type", "").strip()
@@ -213,6 +253,7 @@ def add_activity():
 
 @app.route("/activities/<int:activity_id>/delete", methods=["POST"])
 @login_required
+@role_required("student")
 def delete_activity(activity_id):
     with get_db_connection() as conn:
         conn.execute("DELETE FROM activities WHERE id = ? AND user_id = ?", (activity_id, g.user["id"]))
@@ -222,6 +263,7 @@ def delete_activity(activity_id):
 
 @app.route("/activities/summary")
 @login_required
+@role_required("student")
 def activities_summary():
     return render_template("activities_summary.html", activities=fetch_activities())
 
@@ -299,6 +341,7 @@ def calendar_ics(token):
 
 @app.route("/resume")
 @login_required
+@role_required("student")
 def resume():
     draft = request.args.get("draft") == "1"
     grouped = {}
@@ -341,6 +384,7 @@ def search_opportunities(q="", category="", fmt="", location="", limit=100):
 
 @app.route("/opportunities", methods=["GET", "POST"])
 @login_required
+@role_required("student")
 def opportunities():
     f = {k: request.args.get(k, "").strip()[:100] for k in ("q", "category", "format", "location")}
     ai = {"location_mode": "local", "location": "", "interests": "", "summary": "", "recs": None}
@@ -354,6 +398,7 @@ def opportunities():
 
 @app.route("/opportunities/add", methods=["POST"])
 @login_required
+@role_required("student")
 def add_opportunity():
     f = request.form
     title, org = f.get("title", "").strip()[:150], f.get("organization", "").strip()[:150]
@@ -385,6 +430,7 @@ def add_opportunity():
 
 @app.route("/opportunities/<int:opp_id>/delete", methods=["POST"])
 @login_required
+@role_required("student")
 def delete_opportunity(opp_id):
     with get_db_connection() as conn:
         conn.execute("DELETE FROM opportunities WHERE id = ? AND user_id = ?", (opp_id, g.user["id"]))
@@ -425,12 +471,16 @@ def run_ai_picks():
 
 @app.route("/recommendations")
 @login_required
+@role_required("student")
 def recommendations():
     return redirect(url_for("opportunities"))
 
 
-init_events(app, get_db_connection, login_required, CATEGORIES, MAX_ACTIVITIES)
+init_events(app, get_db_connection, login_required, role_required, CATEGORIES, MAX_ACTIVITIES)
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    # Debug mode is off unless FLASK_DEBUG=1; never combine it with a public address,
+    # because the debugger lets anyone who can reach the server run code.
+    debug = os.environ.get("FLASK_DEBUG") == "1"
+    app.run(host=os.environ.get("HOST", "127.0.0.1"), port=int(os.environ.get("PORT", "5000")), debug=debug)
