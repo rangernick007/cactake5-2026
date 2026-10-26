@@ -230,3 +230,14 @@ body.app-bg hr { border-color: var(--line); }
 .role-choice-hint { font-size: 12px; color: var(--muted); }
 .role-choice:has(input:checked) { border-color: var(--blue); background: rgba(0, 122, 255, 0.07); box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.18); }
 .role-choice:has(input:focus-visible) { box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.35); }
+
+/* Student / Organizer choice on the sign-up page (radio buttons styled as a segmented control) */
+.segmented-radio label { display: block; cursor: pointer; margin: 0; }
+.segmented-radio input { position: absolute; opacity: 0; pointer-events: none; }
+.segmented-radio span {
+    display: block; padding: 6px 18px; border-radius: 7px; font-size: 13px; font-weight: 500; color: var(--ink);
+    transition: background 0.15s;
+}
+.segmented-radio label:hover span { background: rgba(255, 255, 255, 0.5); }
+.segmented-radio input:checked + span { background: #fff; font-weight: 600; box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.04), 0 3px 8px rgba(0, 0, 0, 0.12), 0 3px 1px rgba(0, 0, 0, 0.04); }
+.segmented-radio input:focus-visible + span { outline: 2px solid var(--blue); outline-offset: 1px; }

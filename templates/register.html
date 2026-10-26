@@ -9,15 +9,17 @@
             <form method="post" action="{{ url_for('register') }}" class="space-y-4">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                 <fieldset class="space-y-2">
-                    <legend class="block text-xs font-medium text-slate-700 mb-1">I am a&hellip;</legend>
-                    <div class="grid grid-cols-2 gap-3">
-                        {% for value, label, hint in [('student', 'Student', 'Track activities and join events'), ('organizer', 'Organizer', 'Create events and QR codes')] %}
-                        <label class="role-choice">
-                            <input type="radio" name="role" value="{{ value }}" required {{ 'checked' if chosen_role == value }}>
-                            <span class="role-choice-title">{{ label }}</span>
-                            <span class="role-choice-hint">{{ hint }}</span>
-                        </label>
-                        {% endfor %}
+                    <legend class="block text-xs font-medium text-slate-700 mb-1">I'm using Collegia as a:</legend>
+                    <div class="flex flex-wrap items-center gap-3">
+                        <div class="segmented segmented-radio" role="radiogroup" aria-label="Account type">
+                            {% for value, label in [('student', 'Student'), ('organizer', 'Organizer')] %}
+                            <label>
+                                <input type="radio" name="role" value="{{ value }}" required {{ 'checked' if chosen_role == value }}>
+                                <span>{{ label }}</span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                        <span class="text-xs text-slate-500">Students log activities and join events. Organizers create events and QR codes.</span>
                     </div>
                 </fieldset>
                 <div>

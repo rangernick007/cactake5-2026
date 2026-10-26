@@ -11,11 +11,11 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from init_db import DB_PATH, init_db
 import recommender
+import security
 from events import init_events
 
 app = Flask(__name__)
 logging.basicConfig(level=logging.INFO)
-
 
 def load_secret_key():
     """Use SECRET_KEY from the environment, else a random key saved next to the app."""
@@ -31,11 +31,11 @@ def load_secret_key():
 
 app.secret_key = load_secret_key()
 app.config.update(SESSION_COOKIE_HTTPONLY=True, SESSION_COOKIE_SAMESITE="Lax")
+security.init_security(app)
 
 MAX_ACTIVITIES = 10
 CATEGORIES = ["Academic", "Athletics", "Community Service", "Leadership", "Work Experience", "Arts"]
 
-# Helper function to connect to SQLite whenever a route needs data
 def get_db_connection():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row  # Returns query results as dictionary-like objects
@@ -113,7 +113,10 @@ def register():
         email = request.form.get("email", "").strip().lower()
         password = request.form.get("password", "")
         role = request.form.get("role", "")
-        if role not in ("student", "organizer"):
+        wait = security.signups_by_address.retry_after(request.remote_addr)
+        if wait:
+            flash(f"Too many sign-ups from this device. Try again in {security.minutes(wait)} minute(s).", "error")
+        elif role not in ("student", "organizer"):
             flash("Please choose whether you're a student or an organizer.", "error")
         elif not name or "@" not in email or "." not in email.split("@")[-1]:
             flash("Please enter your name and a valid email address.", "error")
@@ -131,6 +134,7 @@ def register():
                     if first_user:  # the first account adopts data saved before accounts existed
                         for table in ("activities", "deadlines"):
                             conn.execute(f"UPDATE {table} SET user_id = ? WHERE user_id IS NULL", (cur.lastrowid,))
+                security.signups_by_address.add(request.remote_addr)
                 start_session(cur.lastrowid)
                 return redirect(after_login_url())
             except sqlite3.IntegrityError:
@@ -146,11 +150,20 @@ def login():
         return redirect(url_for("home"))
     if request.method == "POST":
         email = request.form.get("email", "").strip().lower()
+        account_key = f"{request.remote_addr}|{email}"
+        wait = max(security.login_by_account.retry_after(account_key),
+                   security.login_by_address.retry_after(request.remote_addr))
+        if wait:
+            flash(f"Too many failed log-in attempts. Try again in {security.minutes(wait)} minute(s).", "error")
+            return render_template("login.html"), 429
         with get_db_connection() as conn:
             user = conn.execute("SELECT * FROM users WHERE email = ?", (email,)).fetchone()
         if user and check_password_hash(user["password_hash"], request.form.get("password", "")):
+            security.login_by_account.reset(account_key)
             start_session(user["id"])
             return redirect(after_login_url())
+        security.login_by_account.add(account_key)
+        security.login_by_address.add(request.remote_addr)
         flash("Incorrect email or password.", "error")
     return render_template("login.html")
 
@@ -196,17 +209,6 @@ def home():
     return render_template("index.html", activities=activities, upcoming=upcoming,
                            service_hours=service_hours, max_activities=MAX_ACTIVITIES)
 
-
-@app.route("/role", methods=["POST"])
-@login_required
-def set_role():
-    role = request.form.get("role", "")
-    if role not in ("student", "organizer"):
-        abort(400)
-    with get_db_connection() as conn:
-        conn.execute("UPDATE users SET role = ? WHERE id = ?", (role, g.user["id"]))
-    flash(f"You're now using Collegia as {'an organizer' if role == 'organizer' else 'a student'}.", "success")
-    return redirect(url_for("home"))
 
 
 # ---------- Activities ----------

@@ -11,17 +11,7 @@
                     {% if current_user.role == 'organizer' %}<a href="{{ url_for('events') }}" class="btn-primary btn-lg">Create an event</a>
                     {% else %}<a href="{{ url_for('activities') }}" class="btn-primary btn-lg">Add an activity</a>{% endif %}
                 </div>
-                <!-- Role selector -->
-                <div class="flex flex-wrap items-center gap-3">
-                    <span class="text-sm text-slate-500">I'm using Collegia as a:</span>
-                    <form method="post" action="{{ url_for('set_role') }}" class="segmented" role="group" aria-label="Account type">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                        {% for value, label in [('student', 'Student'), ('organizer', 'Organizer')] %}
-                        <button type="submit" name="role" value="{{ value }}" {% if current_user.role == value %}aria-pressed="true" class="role-btn active"{% else %}aria-pressed="false" class="role-btn"{% endif %}>{{ label }}</button>
-                        {% endfor %}
-                    </form>
-                    <span class="text-xs text-slate-400">{% if current_user.role == 'organizer' %}Organizers create events and QR codes.{% else %}Students log activities and scan event codes.{% endif %}</span>
-                </div>
+                <p class="text-xs text-slate-500">Signed in as {{ 'an organizer' if current_user.role == 'organizer' else 'a student' }}.</p>
 
                 {% if current_user.role == 'organizer' %}
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
